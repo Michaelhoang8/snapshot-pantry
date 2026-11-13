@@ -1,0 +1,44 @@
+{
+  "before": 1,
+  "after": 2,
+  "counts": {
+    "added": 1,
+    "removed": 1,
+    "modified": 1,
+    "unchanged": 1
+  },
+  "rows": [
+    {
+      "path": "notes/readme.txt",
+      "change": "unchanged",
+      "beforeSize": 73,
+      "afterSize": 73,
+      "beforeHash": "1a3c19809fbea32ecc5e6298bc95f24c67e736b73fef350025b3b673efc50e11",
+      "afterHash": "1a3c19809fbea32ecc5e6298bc95f24c67e736b73fef350025b3b673efc50e11"
+    },
+    {
+      "path": "samples/signal-a.bin",
+      "change": "modified",
+      "beforeSize": 32768,
+      "afterSize": 32768,
+      "beforeHash": "ba1ca831325c8cfdbbac0f2b9d718dae392b3b1b85eaa26f8341bd134c5f6e8a",
+      "afterHash": "27d8002b41e127a212fdb73b0d0a984a2ed392377c7f8c5b8320c2f99caedec3"
+    },
+    {
+      "path": "samples/signal-b.bin",
+      "change": "removed",
+      "beforeSize": 32768,
+      "afterSize": null,
+      "beforeHash": "41cbf9328c09a54939a88c8dcb568145a22932fb4dd3b62d60fed58e0fa80ff0",
+      "afterHash": null
+    },
+    {
+      "path": "samples/signal-c.bin",
+      "change": "added",
+      "beforeSize": null,
+      "afterSize": 32768,
+      "beforeHash": null,
+      "afterHash": "41cbf9328c09a54939a88c8dcb568145a22932fb4dd3b62d60fed58e0fa80ff0"
+    }
+  ]
+}

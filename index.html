@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Snapshot Pantry</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="#"><span>▤</span> snapshot pantry</a>
+      <div>LOCAL FILE COLLECTIONS <button id="refresh">Refresh ledger ↻</button></div>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">KEEP THE VERSION. SHARE THE BYTES.</p>
+          <h1>A place for<br />every version.</h1>
+          <p>File bundles with a memory.<br />Store the changes. Verify what comes back.</p>
+        </div>
+        <div class="storage">
+          <div><span>Logical file bytes</span><strong id="logical">0 B</strong></div>
+          <div><span>Catalogued chunk bytes</span><strong id="stored">0 B</strong></div>
+          <p id="storage-note">Opening the pantry…</p>
+          <p class="small">
+            Chunk bytes exclude SQLite, directory metadata, temporary files, and ZIP compression.
+            Run Verify to check actual content integrity.
+          </p>
+        </div>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+      <div class="workspace">
+        <section class="staging">
+          <div class="section-head">
+            <h2>01 / Stage a bundle</h2>
+            <span id="staged-count">0 files</span>
+          </div>
+          <label
+            >Collection<input
+              id="collection"
+              value="field-notes"
+              maxlength="48"
+              list="collections" /><datalist id="collections"></datalist
+          ></label>
+          <div class="stage-actions">
+            <label class="file"
+              >Add files<input id="files" type="file" multiple aria-label="Add files" /></label
+            ><button id="baseline">Stage baseline study</button
+            ><button id="revised">Stage revised study</button>
+          </div>
+          <p class="small">
+            Files stay in this draft until saved. Adding the same path replaces its staged content.
+            Set relative paths below to organize the restored ZIP.
+          </p>
+          <div id="staged"></div>
+          <div class="save-line">
+            <button id="save" class="primary">Save snapshot ↗</button><span id="expected"></span>
+          </div>
+          <p class="small">
+            1–32 files · 2 MiB per file · 4 MiB per snapshot. Snapshot creation preserves earlier
+            versions.
+          </p>
+        </section>
+        <section class="library">
+          <div class="section-head">
+            <h2>02 / Open the shelf</h2>
+            <span id="snapshot-count"></span>
+          </div>
+          <label>Saved snapshot<select id="snapshot"></select></label>
+          <div id="empty">Your first bundle starts a collection.</div>
+          <div id="snapshot-detail" hidden>
+            <div class="snapshot-meta">
+              <strong id="snapshot-title"></strong><span id="created"></span>
+            </div>
+            <div class="snapshot-actions">
+              <button id="verify">Verify every file</button><button id="zip">Restore as ZIP</button
+              ><button id="manifest">Export manifest</button>
+            </div>
+            <p id="verification" class="small"></p>
+            <div class="scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Bytes</th>
+                    <th>Chunks</th>
+                    <th>SHA-256 prefix</th>
+                  </tr>
+                </thead>
+                <tbody id="manifest-files"></tbody>
+              </table>
+            </div>
+            <details>
+              <summary>Manifest identity</summary>
+              <code id="manifest-digest"></code>
+              <p class="small">
+                The manifest records full file and chunk digests. It contains no file content;
+                restoring also requires the local chunk store.
+              </p>
+            </details>
+          </div>
+        </section>
+      </div>
+      <section class="comparison">
+        <div class="section-head">
+          <h2>03 / Read the changes</h2>
+          <button id="comparison-export" disabled>Export comparison</button>
+        </div>
+        <div class="compare-controls">
+          <label>Before<select id="before"></select></label><span>→</span
+          ><label>After<select id="after"></select></label
+          ><button id="compare">Compare snapshots</button>
+        </div>
+        <div id="comparison-result" hidden>
+          <p id="comparison-summary"></p>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Path</th>
+                  <th>Change</th>
+                  <th>Before bytes</th>
+                  <th>After bytes</th>
+                </tr>
+              </thead>
+              <tbody id="comparison-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <details class="method">
+        <summary>Inside the pantry / storage &amp; limits</summary>
+        <p>
+          Files are split into fixed 16 KiB chunks addressed by SHA-256. Identical chunks share one
+          stored blob across files, snapshots, and collections. A SQLite transaction publishes the
+          complete manifest and chunk catalog. An expected-version check rejects stale saves.
+        </p>
+        <p>
+          Chunks are written through temporary files and atomic replacement before the manifest
+          commits. A failed transaction can leave unreferenced chunk files; storage accounting
+          reports them. There is no deletion or garbage collection. Back up the entire data
+          directory while the service is stopped.
+        </p>
+        <p>
+          Verification checks manifest integrity, each chunk's size and hash, and each reconstructed
+          file's hash. ZIP restoration completes these checks before offering a download. Hashes
+          detect accidental corruption; they do not authenticate against someone who can rewrite the
+          database and blobs.
+        </p>
+        <p>
+          Use portable relative paths with up to four components: ASCII letters/digits/underscores
+          initially, then letters, digits, dots, spaces, underscores, or hyphens. Hidden names,
+          traversal, device names, trailing dots/spaces, case-insensitive collisions, and
+          file/directory conflicts are rejected. ZIPs preserve file bytes and logical paths, not
+          original timestamps, permissions, symlinks, or directory metadata.
+        </p>
+        <p>
+          This local store allows 200 snapshots. It is not encrypted, replicated, or authenticated,
+          and is not a substitute for an independent backup. Requests stay on loopback. The
+          comparison checks manifests rather than rereading file content; Verify and Restore perform
+          content checks.
+        </p>
+      </details>
+    </main>
+    <footer>
+      <span>A SMALL STORE WITH A LONG MEMORY.</span><span>SQLITE + CONTENT-ADDRESSED CHUNKS</span>
+    </footer>
+  </body>
+</html>

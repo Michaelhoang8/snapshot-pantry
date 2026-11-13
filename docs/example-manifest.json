@@ -1,0 +1,56 @@
+{
+  "id": 2,
+  "collection": "field-notes",
+  "version": 2,
+  "digest": "e6a8bcfab845f1db1af04451fe25a07d8f3b8ba7a837573c071d119965bfc950",
+  "created": "2026-11-13T07:14:00.911Z",
+  "manifest": {
+    "chunkSize": 16384,
+    "collection": "field-notes",
+    "files": [
+      {
+        "chunks": [
+          {
+            "hash": "1a3c19809fbea32ecc5e6298bc95f24c67e736b73fef350025b3b673efc50e11",
+            "size": 73
+          }
+        ],
+        "path": "notes/readme.txt",
+        "sha256": "1a3c19809fbea32ecc5e6298bc95f24c67e736b73fef350025b3b673efc50e11",
+        "size": 73
+      },
+      {
+        "chunks": [
+          {
+            "hash": "4348e3b98e8a327b34ced39c1da9e67cdb4cd5e48e4d7960607a3ae403d35f0c",
+            "size": 16384
+          },
+          {
+            "hash": "f9292926fd578c40c1dd57152922977b357e0dc224166cff5c766b9167d6b348",
+            "size": 16384
+          }
+        ],
+        "path": "samples/signal-a.bin",
+        "sha256": "27d8002b41e127a212fdb73b0d0a984a2ed392377c7f8c5b8320c2f99caedec3",
+        "size": 32768
+      },
+      {
+        "chunks": [
+          {
+            "hash": "4348e3b98e8a327b34ced39c1da9e67cdb4cd5e48e4d7960607a3ae403d35f0c",
+            "size": 16384
+          },
+          {
+            "hash": "4348e3b98e8a327b34ced39c1da9e67cdb4cd5e48e4d7960607a3ae403d35f0c",
+            "size": 16384
+          }
+        ],
+        "path": "samples/signal-c.bin",
+        "sha256": "41cbf9328c09a54939a88c8dcb568145a22932fb4dd3b62d60fed58e0fa80ff0",
+        "size": 32768
+      }
+    ],
+    "totalBytes": 65609,
+    "version": 2
+  }
+}
