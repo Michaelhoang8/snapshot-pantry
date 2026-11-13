@@ -18,6 +18,7 @@ const bytes = (n) =>
       : `${(n / 1048576).toFixed(2)} MiB`;
 function status(s) {
   $('status').textContent = s;
+  $('draft-status').textContent = s;
 }
 function controls() {
   for (const n of document.querySelectorAll('button,input,select')) n.disabled = busy;
@@ -89,7 +90,7 @@ function renderStaged() {
     row.append(input, el('span', bytes(f.data.length)), remove);
     $('staged').append(row);
   }
-  if (!staged.length) $('staged').append(el('p', 'Add files or stage a fictional study to begin.'));
+  if (!staged.length) $('staged').append(el('p', 'Add files to this snapshot.'));
   renderExpected();
   controls();
 }
@@ -166,6 +167,29 @@ function renderState() {
   $('storage-note').textContent =
     `${s.chunks} catalogued chunks · ${bytes(s.physicalChunkBytes)} on disk · ${s.orphanChunks} unreferenced · ${s.missingChunks} missing`;
   $('snapshot-count').textContent = `${state.snapshots.length} snapshots`;
+  $('storage-fill').style.width =
+    Math.min(100, s.logicalBytes ? (s.cataloguedChunkBytes / s.logicalBytes) * 100 : 0) + '%';
+  $('collection-nav').replaceChildren();
+  for (const name of new Set(state.snapshots.map((s) => s.collection))) {
+    const b = el('button'),
+      icon = el('span', '▱'),
+      label = el('span', name),
+      count = el('small', state.snapshots.filter((s) => s.collection === name).length);
+    icon.setAttribute('aria-hidden', 'true');
+    b.append(icon, label, count);
+    b.dataset.collection = name;
+    b.setAttribute('aria-pressed', selected?.collection === name);
+    b.onclick = () =>
+      task(async () => {
+        $('snapshot').value = state.snapshots.find((s) => s.collection === name).id;
+        $('collection').value = name;
+        renderExpected();
+        showView(false);
+        await openSnapshot();
+      });
+    $('collection-nav').append(b);
+  }
+  if (!state.snapshots.length) $('collection-nav').append(el('p', 'No collections'));
   $('collections').replaceChildren();
   for (const name of new Set(state.snapshots.map((s) => s.collection))) {
     const opt = el('option');
@@ -191,6 +215,7 @@ async function refresh() {
   renderState();
 }
 async function openSnapshot() {
+  status('');
   selected = null;
   $('snapshot-detail').hidden = true;
   if (!$('snapshot').value) {
@@ -201,10 +226,13 @@ async function openSnapshot() {
   }
   selected = await api('/api/snapshots/' + $('snapshot').value);
   $('snapshot-detail').hidden = false;
-  $('snapshot-title').textContent = `${selected.collection} / version ${selected.version}`;
+  $('snapshot-title').textContent = `Version ${selected.version}`;
+  $('collection-heading').textContent = selected.collection;
+  $('breadcrumb').textContent = 'Collections / ' + selected.collection;
+  for (const b of document.querySelectorAll('[data-collection]'))
+    b.setAttribute('aria-pressed', b.dataset.collection === selected.collection);
   $('created').textContent = selected.created;
-  $('verification').textContent =
-    'Content not verified in this view. Verify checks every chunk and reconstructed file.';
+  $('verification').textContent = 'Not verified in this session.';
   $('manifest-digest').textContent = selected.digest;
   $('manifest-files').replaceChildren();
   for (const f of selected.manifest.files) {
@@ -244,7 +272,9 @@ $('save').addEventListener('click', () =>
     comparison = null;
     $('comparison-result').hidden = true;
     await openSnapshot();
-    status(`Saved ${s.collection} version ${s.version}. Earlier snapshots remain available.`);
+    $('staging-dialog').close();
+    showView(false);
+    status(`Saved ${s.collection} version ${s.version}.`);
   }),
 );
 $('verify').addEventListener('click', () =>
@@ -323,10 +353,23 @@ $('comparison-export').addEventListener('click', () => {
       new Blob([JSON.stringify(comparison, null, 2)], { type: 'application/json' }),
     );
 });
+function showView(compare) {
+  $('files-view').hidden = compare;
+  $('compare-view').hidden = !compare;
+  $('files-tab').setAttribute('aria-pressed', !compare);
+  $('compare-tab').setAttribute('aria-pressed', compare);
+}
+$('files-tab').onclick = () => showView(false);
+$('compare-tab').onclick = () => showView(true);
+$('new-snapshot').onclick = () => {
+  $('draft-status').textContent = '';
+  $('staging-dialog').showModal();
+};
+$('close-staging').onclick = () => $('staging-dialog').close();
 task(async () => {
   await refresh();
   renderStaged();
   if (state.snapshots.length > 1) $('before').value = state.snapshots[1].id;
   await openSnapshot();
-  status('Pantry ready. Stage files or open a saved snapshot.');
+  status('');
 });

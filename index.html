@@ -8,103 +8,71 @@
     <script type="module" src="app.js"></script>
   </head>
   <body>
-    <header>
-      <a href="#"><span>▤</span> snapshot pantry</a>
-      <div>LOCAL FILE COLLECTIONS <button id="refresh">Refresh ledger ↻</button></div>
-    </header>
+    <aside class="navigation">
+      <a class="brand" href="/"><span aria-hidden="true">▤</span> Snapshot Pantry</a
+      ><button id="new-snapshot" class="primary">+ New snapshot</button>
+      <h2>Collections</h2>
+      <div id="collection-nav"></div>
+      <div class="storage">
+        <span class="storage-label">Stored chunks</span><strong id="stored">0 B</strong>
+        <div class="storage-meter"><span id="storage-fill"></span></div>
+        <p>Across <span id="logical">0 B</span> of file versions</p>
+        <span id="snapshot-count"></span>
+        <p id="storage-note"></p>
+        <p class="small">Excludes database and filesystem metadata.</p>
+      </div>
+    </aside>
     <main>
-      <section class="intro">
-        <div>
-          <p class="eyebrow">KEEP THE VERSION. SHARE THE BYTES.</p>
-          <h1>A place for<br />every version.</h1>
-          <p>File bundles with a memory.<br />Store the changes. Verify what comes back.</p>
-        </div>
-        <div class="storage">
-          <div><span>Logical file bytes</span><strong id="logical">0 B</strong></div>
-          <div><span>Catalogued chunk bytes</span><strong id="stored">0 B</strong></div>
-          <p id="storage-note">Opening the pantry…</p>
-          <p class="small">
-            Chunk bytes exclude SQLite, directory metadata, temporary files, and ZIP compression.
-            Run Verify to check actual content integrity.
-          </p>
+      <header>
+        <span id="breadcrumb">Collections</span
+        ><button id="refresh" aria-label="Refresh snapshots">↻ Refresh</button>
+      </header>
+      <div class="page-heading">
+        <h1 id="collection-heading">Files</h1>
+        <p id="status" role="status" aria-live="polite"></p>
+      </div>
+      <nav class="view-tabs" aria-label="Collection views">
+        <button id="files-tab" aria-pressed="true">Files</button
+        ><button id="compare-tab" aria-pressed="false">Compare versions</button>
+      </nav>
+      <section class="library" id="files-view">
+        <label>Saved snapshot<select id="snapshot"></select></label>
+        <div id="empty">No snapshots yet. Create a snapshot to add files.</div>
+        <div id="snapshot-detail" hidden>
+          <div class="snapshot-meta">
+            <strong id="snapshot-title"></strong><span id="created"></span>
+          </div>
+          <div class="snapshot-actions">
+            <button id="verify">Verify files</button><button id="zip">Download ZIP</button
+            ><button id="manifest">Export manifest</button>
+          </div>
+          <p id="verification" class="small"></p>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Bytes</th>
+                  <th>Chunks</th>
+                  <th>SHA-256 prefix</th>
+                </tr>
+              </thead>
+              <tbody id="manifest-files"></tbody>
+            </table>
+          </div>
+          <details>
+            <summary>Manifest identity</summary>
+            <code id="manifest-digest"></code>
+            <p class="small">
+              The manifest records full file and chunk digests. It contains no file content;
+              restoring also requires the local chunk store.
+            </p>
+          </details>
         </div>
       </section>
-      <p id="status" role="status" aria-live="polite"></p>
-      <div class="workspace">
-        <section class="staging">
-          <div class="section-head">
-            <h2>01 / Stage a bundle</h2>
-            <span id="staged-count">0 files</span>
-          </div>
-          <label
-            >Collection<input
-              id="collection"
-              value="field-notes"
-              maxlength="48"
-              list="collections" /><datalist id="collections"></datalist
-          ></label>
-          <div class="stage-actions">
-            <label class="file"
-              >Add files<input id="files" type="file" multiple aria-label="Add files" /></label
-            ><button id="baseline">Stage baseline study</button
-            ><button id="revised">Stage revised study</button>
-          </div>
-          <p class="small">
-            Files stay in this draft until saved. Adding the same path replaces its staged content.
-            Set relative paths below to organize the restored ZIP.
-          </p>
-          <div id="staged"></div>
-          <div class="save-line">
-            <button id="save" class="primary">Save snapshot ↗</button><span id="expected"></span>
-          </div>
-          <p class="small">
-            1–32 files · 2 MiB per file · 4 MiB per snapshot. Snapshot creation preserves earlier
-            versions.
-          </p>
-        </section>
-        <section class="library">
-          <div class="section-head">
-            <h2>02 / Open the shelf</h2>
-            <span id="snapshot-count"></span>
-          </div>
-          <label>Saved snapshot<select id="snapshot"></select></label>
-          <div id="empty">Your first bundle starts a collection.</div>
-          <div id="snapshot-detail" hidden>
-            <div class="snapshot-meta">
-              <strong id="snapshot-title"></strong><span id="created"></span>
-            </div>
-            <div class="snapshot-actions">
-              <button id="verify">Verify every file</button><button id="zip">Restore as ZIP</button
-              ><button id="manifest">Export manifest</button>
-            </div>
-            <p id="verification" class="small"></p>
-            <div class="scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>File</th>
-                    <th>Bytes</th>
-                    <th>Chunks</th>
-                    <th>SHA-256 prefix</th>
-                  </tr>
-                </thead>
-                <tbody id="manifest-files"></tbody>
-              </table>
-            </div>
-            <details>
-              <summary>Manifest identity</summary>
-              <code id="manifest-digest"></code>
-              <p class="small">
-                The manifest records full file and chunk digests. It contains no file content;
-                restoring also requires the local chunk store.
-              </p>
-            </details>
-          </div>
-        </section>
-      </div>
-      <section class="comparison">
+      <section class="comparison" id="compare-view" hidden>
         <div class="section-head">
-          <h2>03 / Read the changes</h2>
+          <h2>Compare versions</h2>
           <button id="comparison-export" disabled>Export comparison</button>
         </div>
         <div class="compare-controls">
@@ -130,7 +98,7 @@
         </div>
       </section>
       <details class="method">
-        <summary>Inside the pantry / storage &amp; limits</summary>
+        <summary>Storage details</summary>
         <p>
           Files are split into fixed 16 KiB chunks addressed by SHA-256. Identical chunks share one
           stored blob across files, snapshots, and collections. A SQLite transaction publishes the
@@ -163,8 +131,40 @@
         </p>
       </details>
     </main>
-    <footer>
-      <span>A SMALL STORE WITH A LONG MEMORY.</span><span>SQLITE + CONTENT-ADDRESSED CHUNKS</span>
-    </footer>
+    <dialog id="staging-dialog" aria-labelledby="stage-title">
+      <button id="close-staging" aria-label="Close new snapshot">×</button>
+      <section class="staging">
+        <div class="section-head">
+          <h2 id="stage-title">New snapshot</h2>
+          <span id="staged-count">0 files</span>
+        </div>
+        <label
+          >Collection<input
+            id="collection"
+            value="field-notes"
+            maxlength="48"
+            list="collections" /><datalist id="collections"></datalist
+        ></label>
+        <div class="stage-actions">
+          <label class="file"
+            >Add files<input id="files" type="file" multiple aria-label="Add files" /></label
+          ><button id="baseline">Load sample files</button
+          ><button id="revised">Load changed sample</button>
+        </div>
+        <p class="small">
+          Files stay in this draft until saved. Adding the same path replaces its staged content.
+          Set relative paths below to organize the restored ZIP.
+        </p>
+        <div id="staged"></div>
+        <div class="save-line">
+          <button id="save" class="primary">Save snapshot</button><span id="expected"></span>
+        </div>
+        <p class="small">
+          1–32 files · 2 MiB per file · 4 MiB per snapshot. Snapshot creation preserves earlier
+          versions.
+        </p>
+      </section>
+      <p id="draft-status" role="status"></p>
+    </dialog>
   </body>
 </html>

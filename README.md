@@ -4,6 +4,10 @@ A local file-snapshot store with content-addressed deduplication, immutable vers
 
 ![Snapshot Pantry](docs/workbench.png)
 
+## Interface
+
+The file-browser layout groups saved collections in the left navigation and keeps storage usage visible while scrolling. The main file table opens a selected snapshot; **Compare versions** switches to the manifest comparison. **New snapshot** opens a centered staging dialog, with local file selection, relative paths, and sample bundles. Saving closes the dialog and selects the new version. Narrow screens use a horizontally scrollable collection list and file table.
+
 ## Run
 
 Requires Python 3.10+. No runtime dependencies or API keys.
@@ -83,3 +87,5 @@ npm run check
 Twelve tests cover binary/empty/nested-file restoration, deduplication across files/versions/collections, eight competing writers, injected transaction rollback and orphan reuse, corrupted/missing chunks, manifest/file hashes, all comparison categories, portable-path collisions and prefix conflicts, bounds, HTTP behavior, and prevention of corrupt ZIP downloads. CI runs Python 3.11/3.13 on Ubuntu and Windows.
 
 Browser checks covered baseline/revised snapshot creation, verification, comparison, manifest/ZIP downloads, unsafe-path rejection without a new version, real PNG upload/restoration, and persistence after refresh. Independent Python checks verified all sample ZIP bytes, every chunk/file hash, canonical manifest digest, comparison categories, and exact uploaded-PNG restoration.
+
+The file-browser redesign was checked in the browser at desktop and 390-pixel widths. Checks covered collection navigation, verifying stored files, dialog dismissal, staging and saving two fictional design-review versions, and a comparison with one added, removed, modified, and unchanged file.
